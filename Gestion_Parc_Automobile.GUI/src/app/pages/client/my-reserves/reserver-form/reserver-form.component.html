@@ -1,0 +1,47 @@
+<form class="w-100"  [formGroup]="formReservation" >
+
+    <h2>Reservation</h2>
+
+    <mat-divider class="pt-1 pb-2"></mat-divider>
+
+    <div class="container">
+
+        <div class="row">
+            <!-- date debut -->
+            <div class="col-6">
+                <mat-form-field class="w-100">
+                    <input matInput [min]="currentDate" [matDatepicker]="pickerDateDebut"
+                        formControlName="pickerDateDebut" name="pickerDateDebut" placeholder="Date debut" required>
+                    <mat-datepicker-toggle matSuffix [for]="pickerDateDebut"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerDateDebut></mat-datepicker>
+                    <mat-error *ngIf="formReservation.controls.pickerDateDebut.hasError('required')">Champ obligatoire
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <!-- date fin -->
+            <div class="col-6">
+                <mat-form-field class="w-100">
+                    <input matInput [min]="currentDate" [matDatepicker]="pickerDateFin" formControlName="pickerDateFin"
+                        name="pickerDateFin" placeholder="Date fin" required>
+                    <mat-datepicker-toggle matSuffix [for]="pickerDateFin"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerDateFin></mat-datepicker>
+                    <mat-error *ngIf="formReservation.controls.pickerDateFin.hasError('required')">Champ obligatoire
+                    </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">             
+                <button mat-raised-button color="primary" (click)="enregistrer()">Reserver</button>
+            </div>
+            <div class="col-6">
+                <button mat-raised-button color="accent"  (click)="annuler()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+  
+
+</form>
+

@@ -1,0 +1,44 @@
+
+
+<div class="container px-0 px-sm-3 pt-sm-4 ">
+  
+    <div class="card mb-3 p-5">
+      <div class="card-body sgl-page-text">
+  
+        <app-grid-material [dataSource]="dataSource" primaryField="id"
+        [enableFilter]="true" [enablePagination]="true" [enableSort]="true" 
+        [enableInsert]="true" (onInsert)="editDetail(null)" >
+        
+            <app-column-material name="id" caption="Code" field="id"></app-column-material>
+        
+            <app-column-material name="name" caption="Name" field="name" ></app-column-material>
+        
+            <app-column-material name="dateMiseEnCirculation" caption="dateMiseEnCirculation" field="dateMiseEnCirculation" [dataType]="'date'" [dataTypeFormat]="'dd/MM/yyyy'"></app-column-material>
+        
+            <app-column-material name="marqueName" caption="Marque" field="marqueName" ></app-column-material>
+
+            <app-column-material name="modeleName" caption="Modele" field="modeleName" ></app-column-material>
+            <app-column-material name="coleurName" caption="Coleur" field="coleurName" ></app-column-material>
+            
+           
+
+            <app-column-material name="kilometrage" caption="kilometrage" field="kilometrage" [dataType]="'number'"></app-column-material>
+
+            <app-column-material name="statutName" caption="Statut" field="statutName" ></app-column-material>
+
+            <app-column-material   name="action"  [enableEdit]="isManager" (onEdit)="editDetail($event)" ></app-column-material>
+
+            
+            <app-column-material name="select" caption="" [template]="forcerItemAffectations"></app-column-material>
+
+        </app-grid-material>
+      </div>
+  
+    </div>
+  </div>
+
+
+  <ng-template #forcerItemAffectations let-data>
+    <button *ngIf="isManager && data.estReserve" mat-button color="primary" (click)="deleteVoiture(data)">Supprimer</button>
+    <button *ngIf="data.estReserve" mat-button color="primary" (click)="onCreateReserve(data)">Reserver</button>
+ </ng-template>

@@ -1,0 +1,211 @@
+<div class="row mb-3">
+  <div class="col-12 col-md-6 pr-1" *ngIf="enableFilter">
+    <mat-form-field class="w-100">
+      <input matInput (keyup)="filtrerDataSource($event)"
+        placeholder="Filtrer">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="col-12 col-sm-12 col-md-6 pl-0 pb-1 align-self-center"> 
+    <ul id="myToolbarGridMaterial" 
+    [ngClass]="{'clsToolbar-40':(enableRefresh || enableExport || enableInlineInsert || enableInsert || (selection && selection.selected.length > 0 || persisteVisibilityMultiActions)), 
+                'clsToolbar-0':!(enableRefresh || enableExport || enableInlineInsert || enableInsert || (selection && selection.selected.length > 0 || persisteVisibilityMultiActions)) }">
+      <li>
+        <button mat-raised-button class="btn btn-segula" (click)="insert()" *ngIf="enableInlineInsert || enableInsert">
+          <mat-icon>add_circle</mat-icon> &nbsp; Ajouter
+        </button>
+      </li>
+      <li>
+        <button mat-raised-button *ngIf="enableRefresh" (click)="refreshData()">
+          <mat-icon>
+            autorenew</mat-icon>
+        </button>
+      </li>
+      <li>
+        <button mat-raised-button *ngIf="enableExport"  (click)="exporter()">
+          <mat-icon >
+            get_app</mat-icon>
+        </button>
+      </li>
+      <li>
+        <button mat-raised-button  *ngIf="enableExpandColumn" (click)="etendreColonnes()">
+          <mat-icon  *ngIf="!expandColumns">
+            fullscreen</mat-icon>
+          <mat-icon *ngIf="expandColumns">
+            fullscreen_exit</mat-icon>
+        </button>
+      </li>
+      <li  *ngIf="selection && selection.selected.length > 0 || persisteVisibilityMultiActions" style=" margin-left: auto;">
+        <div class="align-self-center text-right">
+          <small>Selection multiple {{  selection?.selected?.length }} </small>
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item *ngIf="!templateMultiEdition">
+              <span  >AUCUNE ACTION</span>
+            </button>
+            <ng-container *ngTemplateOutlet="templateMultiEdition; context: {$implicit: selection.selected}"></ng-container>
+          </mat-menu>
+        </div>
+      </li>
+    </ul>
+  </div>
+<!--
+  <div class="col-12 pt-1">
+    <ng-container *ngTemplateOutlet="tepmplateActionsSupplementaires; context: {$implicit: selection.selected}"></ng-container>
+  </div>
+ </div>
+-->
+</div>
+<div class="row">
+  <div class="col table-responsive">
+    <table mat-table #table [dataSource]="internalDataSource" matSort class="w-100"
+    [multiTemplateDataRows]="activateCollapseRow" >
+      <!-- Expand Column collapse -->
+      <ng-container [matColumnDef]="collapseColumnName">
+        <th mat-header-cell *matHeaderCellDef (click)="expandAllCollapse()" class="toggle">
+          <fa-icon *ngIf="activateCollapseAllRow" [icon]="['fas',  'compress' ]"></fa-icon>
+          <fa-icon *ngIf="!activateCollapseAllRow" [icon]="['fas', 'expand' ]"></fa-icon>
+        </th>
+        <td mat-cell *matCellDef="let element" class="mat-cell-child-item">
+          <span *ngIf='element.isRowCollapse === false'>
+          </span>
+          <span *ngIf='element.isRowCollapse === true' (click)="expandCollapse(element)" class="toggle">
+            <fa-icon *ngIf="element.isExpanded === false" [icon]="['fas', 'caret-right' ]" class="fa-1-3x"></fa-icon>
+            <fa-icon *ngIf="element.isExpanded === true" [icon]="['fas', 'caret-down' ]" class="fa-1-3x"></fa-icon>
+          </span>
+        </td>
+        <td mat-footer-cell *matFooterCellDef ></td>
+      </ng-container>
+
+      <ng-container [matColumnDef]="mutliEditionColumnName">
+        <th mat-header-cell *matHeaderCellDef [ngClass]="{'d-none': !multiEdition}">
+          <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let element" [ngClass]="{'d-none': !multiEdition}">
+          <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(element) : null"
+            [checked]="selection.isSelected(element)">
+          </mat-checkbox>
+        </td>
+        <td mat-footer-cell *matFooterCellDef [ngClass]="{'d-none': !multiEdition}"></td>
+      </ng-container>
+
+      <ng-container *ngFor="let column of columns" matColumnDef="{{column.name}}">
+        <!-- headers -->
+        <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!column.enableSort"
+          [ngClass]="{'text-nowrap': column.noWrap}">
+          {{column.caption}}
+        </th>
+        <!-- body -->
+        <td mat-cell *matCellDef="let element" [ngClass]="{'text-nowrap': column.noWrap, 'd-none': !column.condition}">
+          <ng-container *ngIf="!column.editable || !element.editing">
+            <ng-container *ngIf="!column.template" [ngSwitch]="column.dataType">
+            <!-- <ng-container *ngSwitchCase="'date'">{{getData(element,column.field) | date:column.dataTypeFormat:'UTC'}}
+              </ng-container>-->
+
+               <ng-container *ngSwitchCase="'date'">{{getData(element,column.field) | date:column.dataTypeFormat}}
+              </ng-container>
+
+
+              <mat-checkbox *ngSwitchCase="'boolean'" [checked]="getData(element,column.field)" [disabled]='true'></mat-checkbox>
+              <ng-container *ngSwitchCase="'currency'">{{getData(element,column.field) | currency:'EUR':'€'}}</ng-container>
+              <ng-container *ngSwitchDefault>
+                <ng-container  >{{getData(element,column.field)}} </ng-container>
+              </ng-container>
+            </ng-container>
+            <ng-container *ngTemplateOutlet="column.template; context: {$implicit: element}"></ng-container>
+          </ng-container>
+
+          <ng-container *ngIf="column.editable && element.editing" [ngSwitch]="column.dataType">
+            <ng-container *ngIf="!column.templateUpdate">
+              <mat-form-field *ngSwitchCase="'date'" class="d-block w-100">
+                <input matInput [matDatepicker]="picker_d" [(ngModel)]="element[column.field]">
+                <mat-datepicker-toggle matSuffix [for]="picker_d"></mat-datepicker-toggle>
+                <mat-datepicker #picker_d></mat-datepicker>
+              </mat-form-field>
+              <mat-checkbox *ngSwitchCase="'boolean'" [checked]="element[column.field]"></mat-checkbox>
+              <ng-container *ngSwitchCase="'currency'">{{element[column.field] | currency:'EUR':'€'}}
+              </ng-container>
+              <mat-form-field *ngSwitchDefault class="w-100">
+                <input [type]="column.dataType" matInput [(ngModel)]="element[column.field]">
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngTemplateOutlet="column.templateUpdate; context: {$implicit: element}"></ng-container>
+          </ng-container>
+
+          <mat-checkbox *ngIf="column.enableSelect" [checked]="element['selected']"></mat-checkbox>
+
+          <button mat-icon-button *ngIf="(column.condition && column.condition(column, element)) && (column.enableInlineEdit && !element.editing) || column.enableEdit"
+          (click)="edit(column, element)" class="pr-2 text-dark" >
+            <mat-icon >edit</mat-icon>
+          </button>
+
+        <button mat-icon-button *ngIf="column.enableDelete && !element.editing" href="javascript:void(0)" (click)="delete(column, element)"
+       class="pr-2 text-dark">
+          <mat-icon >delete</mat-icon>
+        </button>
+
+        <button mat-icon-button *ngIf="(column.enableInlineEdit || column.enableInlineInsert) && element.editing" href="javascript:void(0)"
+        (click)="enregistrer(column, element)" class="pr-2 text-dark">
+           <mat-icon>save</mat-icon>
+         </button>
+
+          <a *ngIf="(column.enableInlineEdit || column.enableInlineInsert) && element.editing" href="javascript:void(0)"
+            (click)="cancel(element)" class="pr-2 text-danger" >
+            <fa-icon [icon]="['fas','times']"></fa-icon>
+          </a>
+
+        </td>
+        <!-- footer -->
+        <td mat-footer-cell *matFooterCellDef>
+          <ng-container *ngIf="column.enableFooter">
+            <ng-container *ngIf="!column.templateFooter" [ngSwitch]="column.dataType">
+              <ng-container *ngSwitchCase="'number'"> {{getTotals(column.field)}}</ng-container>
+              <ng-container *ngSwitchCase="'currency'"> {{getTotals(column.field) | currency:'EUR':'€'}}</ng-container>
+              <ng-container *ngSwitchDefault>{{column.caption}}</ng-container>
+            </ng-container>
+            <ng-container *ngTemplateOutlet="column.templateFooter"></ng-container>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <!-- Expanded Content - Row two -->
+      <ng-container *ngIf="activateCollapseRow" matColumnDef="expandedDetail">
+        <td mat-cell [attr.colspan]="displayedColumns.length" class="mat-cell-child" *matCellDef="let element"
+          [@expandableRow]="element.isExpanded ? 'expanded' : 'collapsed'">
+          <div *ngIf="element.isExpanded" style="padding-top: 10px; padding-bottom: 10px; padding-right: 10px;">
+            <ng-container *ngTemplateOutlet="collapseDetail; context: {$implicit: element}"></ng-container>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <ng-container *ngIf="activateCollapseRow">
+        <tr mat-row class="expandable-row" *matRowDef="let row; columns: ['expandedDetail'];"> </tr>
+      </ng-container>
+
+      <ng-container *ngIf="enableFooter">
+        <tr mat-footer-row *matFooterRowDef="displayedColumns" [hidden]='internalDataSource.filteredData.length == 0'>
+        </tr>
+      </ng-container>
+
+    </table>
+    <div class="w-100 overflow-auto  text-center segula-coleur-violet"
+      *ngIf="!internalDataSource || !internalDataSource?.data?.length" >NO DATA
+    </div>
+  </div>
+</div>
+
+<div class="row" [hidden]='dataLength === 0 || !enablePagination'>
+  <div class="col">
+    <mat-paginator *ngIf="dataLength>0" #paginator [length]="dataLength" [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions" showFirstLastButtons>
+    </mat-paginator>
+  </div>
+</div>

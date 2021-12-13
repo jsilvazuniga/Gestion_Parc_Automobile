@@ -1,0 +1,25 @@
+
+
+<div class="container px-0 px-sm-3 pt-sm-4 ">
+  
+    <div class="card mb-3 p-5">
+      <div class="card-body sgl-page-text">
+  
+        <app-grid-material [dataSource]="dataSource" primaryField="id"
+        [enableFilter]="true" [enablePagination]="true" [enableSort]="true"  >
+        
+            <app-column-material name="codeVoiture" caption="Code" field="codeVoiture"></app-column-material>
+        
+            <app-column-material name="nomVoiture" caption="Voiture" field="nomVoiture" ></app-column-material>
+        
+            <app-column-material name="dateDebut" caption="dateDebut" field="dateDebut" [dataType]="'date'" [dataTypeFormat]="'dd/MM/yyyy'"></app-column-material>
+        
+            <app-column-material name="dateFin" caption="dateFin" field="dateFin" [dataType]="'date'" [dataTypeFormat]="'dd/MM/yyyy'"></app-column-material>
+       
+
+        </app-grid-material>
+      </div>
+  
+    </div>
+  </div>
+
