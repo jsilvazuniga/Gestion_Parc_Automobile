@@ -81,7 +81,8 @@ namespace Gestion_Parc_Automobile.WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpDelete]
+        //[HttpDelete]
+        [HttpPost]
         [Route("SupprimerVoiture/{idVoiture}")]
         public ActionResult<bool> SupprimerVoiture(int idVoiture)
         {

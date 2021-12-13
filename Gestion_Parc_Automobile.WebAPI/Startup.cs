@@ -50,7 +50,9 @@ namespace Gestion_Parc_Automobile.WebAPI
             
             services.AddControllers();
 
-            var allowedDomains = new[] { "http://localhost:4200" };
+            var allowedDomains = new[] { "http://localhost:4200",
+            "http://parcmobiledemo.azurewebsites.net",
+            "http://localhost:8085"};
 
             services.AddCors(options =>
             {
@@ -79,9 +81,10 @@ namespace Gestion_Parc_Automobile.WebAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gestion_Parc_Automobile.WebAPI v1"));
+               
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gestion_Parc_Automobile.WebAPI v1"));
 
             PrepPopulation_ParcAutomobile(app);
             PrepPopulation_GestionUtilisateurs(app);
@@ -93,6 +96,19 @@ namespace Gestion_Parc_Automobile.WebAPI
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+
+            app.Use(async (context, next) =>
+            {
+                await next();
+                if (context.Response.StatusCode == 404 && !System.IO.Path.HasExtension(context.Request.Path.Value))
+                {
+                    context.Request.Path = "/index.html";
+                    await next();
+                }
+            });
+
+            app.UseDefaultFiles();
 
             app.UseStaticFiles();
 
